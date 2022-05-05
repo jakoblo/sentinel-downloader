@@ -7,13 +7,13 @@ from rasterio.warp import transform_bounds
 import os
 
 # Search
-def search(bbox, datetime, cloudcover=20):
+def search(bbox, datetime, cloudcover=20, limit=20):
   stac_endpoint = "https://earth-search.aws.element84.com/v0/search"
 
   query = {
       "collections": ["sentinel-s2-l2a-cogs"], # Make sure to query only sentinel-2 COGs collection
       "datetime": datetime,
-      "limit": 10, # max limit is 10000, default is 10
+      "limit": limit, # max limit is 10000, default is 10
       "query": {
           "eo:cloud_cover": {
               "lt": cloudcover
@@ -77,7 +77,7 @@ def find_files(assets, bands):
 
 if __name__ == '__main__':
   bbox = [-7.754594852215678,40.3226711552789,-7.715919971356005,40.3394747419913]
-  assets = search(bbox, "2021-03-19T00:00:00Z/2022-03-22T00:00:00Z", 20)
+  assets = search(bbox, "2021-03-19T00:00:00Z/2021-03-22T00:00:00Z", cloudcover=20, limit=20)
   bands = ["B02","B03","B04","B08","B11","B12"]
   files = find_files(assets, bands)
   print("Number of files:", len(files))
