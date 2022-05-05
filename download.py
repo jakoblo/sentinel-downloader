@@ -55,19 +55,15 @@ def download(file, bbox, buffer=0):
       return img, src.meta.copy(), win.transform(w, src.transform)
 
     
-def save(out_image, out_meta, out_transform, nodata, dir, filename, delete):
+def save(out_image, out_meta, out_transform, dir, filename):
   if dir:
     os.makedirs(dir, exist_ok=True)
     filename = dir + "/" + filename
   kwargs = out_meta
   kwargs.update({'driver': 'GTiff', 'height': out_image.shape[0],
-                    'width': out_image.shape[1], 'transform': out_transform,
-                    'nodata': nodata, 'dtype': rasterio.float32})
+                    'width': out_image.shape[1], 'transform': out_transform, 'dtype': rasterio.float32})
   with rasterio.open(filename, 'w', **kwargs) as dst:
       dst.write_band(1, out_image.astype(rasterio.float32))
-  #send_to_minio(dir+filename, filename.replace("_", "/"))
-  if delete:
-      os.remove(dir+filename)
 
 def find_files(assets, bands):
   li = []
@@ -78,12 +74,16 @@ def find_files(assets, bands):
   return li
 
 if __name__ == '__main__':
-  bbox = [160.6,-55.95,-170,-25.89]
-  assets = search(bbox, "2022-01-01T00:00:00Z/2022-03-01T00:00:00Z", 20)
+  bbox = [-7.75993653535741,40.30200201007429,-7.711230474241011,40.35894313380436]
+  assets = search(bbox, "2021-03-19T00:00:00Z/2022-03-26T00:00:00Z", 20)
   bands = ["B02","B03","B04","B08","B11","B12"]
   files = find_files(assets, bands)
+  print("Number of files:", len(files))
   
   print(files)
-  # for f in files:
-  #   img = download(f, bbox, 50)
-  #   save(img)
+  fire_date = "2021-03-18_"
+  for f in files:
+    img, meta, tf = download(f, bbox, 50)
+    s = f.split("/")
+    name = fire_date+s[9]+"_"+s[10]
+    save(img, meta, tf, "/mnt/box/julia/burnedareasBbox", name)
