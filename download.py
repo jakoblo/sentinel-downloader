@@ -35,10 +35,12 @@ def search(bbox, datetime, cloudcover=20):
 
 
   search = requests.post(stac_endpoint, headers=headers, json=query).json()
-  # if search and len(search['features']) > 0:
-  #     dates = [f["properties"]["datetime"][0:10] for f in search["features"]]
+  if search and len(search['features']) > 0:
+      dates = [f["properties"]["datetime"][0:10] for f in search["features"]]
   #     thumbs = [f["assets"]["thumbnail"]["href"] for f in search["features"]]
   # print(search['numberReturned'], "items found")
+  print("search - dates:", dates)
+  print("search - features:", len(search["features"]))
   return search
 
 
