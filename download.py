@@ -1,6 +1,4 @@
 import requests
-import matplotlib.pyplot as plt
-from rasterio.plot import show
 import urllib
 import rasterio
 import rasterio.windows as win
@@ -9,24 +7,19 @@ from rasterio.warp import transform_bounds
 import os
 
 # Search
-def search():
+def search(bbox, datetime, cloudcover=20):
   stac_endpoint = "https://earth-search.aws.element84.com/v0/search"
-  dt = "2022-01-01T00:00:00Z" + "/" + "2022-03-01T00:00:00Z"
-  bbox = [160.6,-55.95,-170,-25.89]
-  bbox = [-110,39.5,-105,40.5]
-  bbox_pt = [-7.6551,40.0529,-7.3585,40.1889]
-  cloud_cover = 20
 
   query = {
       "collections": ["sentinel-s2-l2a-cogs"], # Make sure to query only sentinel-2 COGs collection
-      "datetime": dt,
+      "datetime": datetime,
       "limit": 10, # max limit is 10000, default is 10
       "query": {
           "eo:cloud_cover": {
-              "lt": cloud_cover
+              "lt": cloudcover
           }  # Use low cloud cover
       },
-      "bbox": bbox_pt,
+      "bbox": bbox,
       #"intersects": geom,
       "fields": {
         'include': ['id', 'properties.datetime', 'properties.eo:cloud_cover'],  # Make returned response ligth 
@@ -42,35 +35,25 @@ def search():
 
 
   search = requests.post(stac_endpoint, headers=headers, json=query).json()
-  if search and len(search['features']) > 0:
-      dates = [f["properties"]["datetime"][0:10] for f in search["features"]]
-      thumbs = [f["assets"]["thumbnail"]["href"] for f in search["features"]]
-  print(search['numberReturned'], "items found")
-  print("dates:", dates)
+  # if search and len(search['features']) > 0:
+  #     dates = [f["properties"]["datetime"][0:10] for f in search["features"]]
+  #     thumbs = [f["assets"]["thumbnail"]["href"] for f in search["features"]]
+  # print(search['numberReturned'], "items found")
+  return search
 
 
-def download(bbox):
+def download(file, bbox, buffer=0):
   bbox_crs = CRS.from_epsg("4326")
-  # buffer in meters
-  buffer = 0
-
-  with rasterio.open("B02.tif") as src:
+  with rasterio.open(file) as src:
       # bounds (left, bottom, right, top)
       bounds = transform_bounds(bbox_crs,src.crs, bbox)
       if buffer > 0:
           bounds = (bounds[0]-buffer, bounds[1]-buffer, bounds[2]+buffer, bounds[3]+buffer)
       w = win.from_bounds(*bounds, src.transform)
-      b1 = src.read(1, window=w)
-      
-  with rasterio.open("B03.tif") as src2:
-      bounds = transform_bounds(bbox_crs,src2.crs, *bbox)
-      if buffer > 0:
-          bounds = (bounds[0]-buffer, bounds[1]-buffer, bounds[2]+buffer, bounds[3]+buffer)
-      w = win.from_bounds(*bounds, src2.transform)
-      b2 = src2.read(1, window=w)
-      out_meta = src2.meta
-      out_transform = src2.transform
-      out_nodata = src2.nodata
+      img = src.read(1, window=w)
+
+      return img, src.meta.copy(), win.transform(w, src.transform)
+
     
 def save(out_image, out_meta, out_transform, nodata, dir, filename, delete):
   if dir:
@@ -86,8 +69,21 @@ def save(out_image, out_meta, out_transform, nodata, dir, filename, delete):
   if delete:
       os.remove(dir+filename)
 
+def find_files(assets, bands):
+  li = []
+  for a in search["features"]:
+    asset = a["assets"]
+    for b in bands:
+        li.append(asset[b]["href"])
+  return li
+
 if __name__ == '__main__':
-  res = search()
-  for 
-    img = download()
-    save(im)
+  bbox = [160.6,-55.95,-170,-25.89]
+  assets = search(bbox, "2022-01-01T00:00:00Z/2022-03-01T00:00:00Z", 20)
+  #bands = ["B02","B03","B04","B08","B11","B12"]
+  #files = find_files(assets, bands)
+  
+  print(files)
+  # for f in files:
+  #   img = download(f, bbox, 50)
+  #   save(img)
