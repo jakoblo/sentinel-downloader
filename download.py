@@ -71,7 +71,7 @@ def save(out_image, out_meta, out_transform, nodata, dir, filename, delete):
 
 def find_files(assets, bands):
   li = []
-  for a in search["features"]:
+  for a in assets["features"]:
     asset = a["assets"]
     for b in bands:
         li.append(asset[b]["href"])
@@ -80,8 +80,8 @@ def find_files(assets, bands):
 if __name__ == '__main__':
   bbox = [160.6,-55.95,-170,-25.89]
   assets = search(bbox, "2022-01-01T00:00:00Z/2022-03-01T00:00:00Z", 20)
-  #bands = ["B02","B03","B04","B08","B11","B12"]
-  #files = find_files(assets, bands)
+  bands = ["B02","B03","B04","B08","B11","B12"]
+  files = find_files(assets, bands)
   
   print(files)
   # for f in files:
