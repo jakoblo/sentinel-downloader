@@ -4,6 +4,7 @@ import rasterio
 import rasterio.windows as win
 from rasterio.crs import CRS
 from rasterio.warp import transform_bounds
+from rasterio.enums import Resampling
 import os
 
 # Search
@@ -44,7 +45,7 @@ def search(bbox, datetime, cloudcover=20, limit=20):
   return search
 
 
-def download(file, bbox, buffer=0):
+def download(file, bbox, buffer=0, scale_factor=0):
   bbox_crs = CRS.from_epsg("4326")
   with rasterio.open(file) as src:
       # bounds (left, bottom, right, top)
@@ -52,8 +53,23 @@ def download(file, bbox, buffer=0):
       if buffer > 0:
           bounds = (bounds[0]-buffer, bounds[1]-buffer, bounds[2]+buffer, bounds[3]+buffer)
       w = win.from_bounds(*bounds, src.transform)
-      img = src.read(1, window=w)
+      if scale_factor != 0:
+        res_window = win.Window(w.col_off * scale_factor, w.row_off * scale_factor,
+                    w.width * scale_factor, w.height * scale_factor)
+        img = src.read(1,
+                out_shape=(
+                    src.count,
+                    int(res_window.height),
+                    int(res_window.width)
+                ),
+                resampling=Resampling.bilinear,
+                masked=False,
+                window=w
+            )
 
+        return img, src.meta.copy(), win.transform(w, src.transform)
+
+      img = src.read(1, window=w)
       return img, src.meta.copy(), win.transform(w, src.transform)
 
     
