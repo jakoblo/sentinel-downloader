@@ -88,4 +88,4 @@ if __name__ == '__main__':
     s = f.split("/")
     name = fire_date+s[9]+"_"+s[10]
     save(img, meta, tf, "/mnt/box/julia/burnedareasBbox", name)
-    print(name, "downloaded successfuly")
+    print(name, "downloaded successfully")
