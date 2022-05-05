@@ -100,8 +100,12 @@ if __name__ == '__main__':
   
   fire_date = "2021-03-18_"
   for f in files:
-    img, meta, tf = download(f, bbox, 50)
     s = f.split("/")
+    b = s[10].split(".")[0]
+    scale = 0
+    if b == "B11" or b == "B12":
+      scale = 2
+    img, meta, tf = download(f, bbox, buffer=50, scale_factor=scale)
     name = fire_date+s[9]+"_"+s[10]
     save(img, meta, tf, "/mnt/box/julia/burnedareasBbox", name)
     print(name, "downloaded successfully")
