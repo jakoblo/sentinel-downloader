@@ -46,7 +46,7 @@ def download(file, bbox, buffer=0):
   bbox_crs = CRS.from_epsg("4326")
   with rasterio.open(file) as src:
       # bounds (left, bottom, right, top)
-      bounds = transform_bounds(bbox_crs,src.crs, bbox)
+      bounds = transform_bounds(bbox_crs, src.crs, *bbox)
       if buffer > 0:
           bounds = (bounds[0]-buffer, bounds[1]-buffer, bounds[2]+buffer, bounds[3]+buffer)
       w = win.from_bounds(*bounds, src.transform)
@@ -80,10 +80,10 @@ if __name__ == '__main__':
   files = find_files(assets, bands)
   print("Number of files:", len(files))
   
-  print(files)
   fire_date = "2021-03-18_"
   for f in files:
     img, meta, tf = download(f, bbox, 50)
     s = f.split("/")
     name = fire_date+s[9]+"_"+s[10]
     save(img, meta, tf, "/mnt/box/julia/burnedareasBbox", name)
+    print(name, "downloaded successfuly")
