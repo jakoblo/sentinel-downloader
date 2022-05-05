@@ -75,7 +75,7 @@ def find_files(assets, bands):
 
 if __name__ == '__main__':
   bbox = [-7.754594852215678,40.3226711552789,-7.715919971356005,40.3394747419913]
-  assets = search(bbox, "2021-03-19T00:00:00Z/2022-03-26T00:00:00Z", 20)
+  assets = search(bbox, "2021-03-19T00:00:00Z/2022-03-22T00:00:00Z", 20)
   bands = ["B02","B03","B04","B08","B11","B12"]
   files = find_files(assets, bands)
   print("Number of files:", len(files))
