@@ -47,6 +47,7 @@ def search(bbox, datetime, cloudcover=20, limit=20):
 
 def download(file, bbox, buffer=0, scale_factor=0):
   bbox_crs = CRS.from_epsg("4326")
+  print(scale_factor)
   with rasterio.open(file) as src:
       # bounds (left, bottom, right, top)
       bounds = transform_bounds(bbox_crs, src.crs, *bbox)
@@ -106,6 +107,6 @@ if __name__ == '__main__':
     if b == "B11" or b == "B12":
       scale = 2
     img, meta, tf = download(f, bbox, buffer=50, scale_factor=scale)
-    name = fire_date+s[9]+"_"+s[10]
-    save(img, meta, tf, "/mnt/box/julia/burnedareasBbox", name)
-    print(name, "downloaded successfully")
+    # name = fire_date+s[9]+"_"+s[10]
+    # save(img, meta, tf, "/mnt/box/julia/burnedareasBbox", name)
+    # print(name, "downloaded successfully")
