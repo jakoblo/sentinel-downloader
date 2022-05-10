@@ -52,7 +52,16 @@ def download(file, bbox, buffer=0, scale_factor=0):
       bounds = transform_bounds(bbox_crs, src.crs, *bbox)
       if buffer > 0:
           bounds = (bounds[0]-buffer, bounds[1]-buffer, bounds[2]+buffer, bounds[3]+buffer)
-      w = win.from_bounds(*bounds, src.transform)
+      wb = win.from_bounds(*bounds, src.transform)
+      # change window with and height to a 128 pixel grid
+      window_width = wb.width
+      window_height = wb.height
+      if wb.width % 128 != 0:
+          window_width = wb.width+(128-wb.width % 128)
+      if wb.height % 128 != 0:
+          window_height = wb.height+(128-wb.height % 128)
+      
+      w = win.Window(col_off=wb.col_off, row_off=wb.row_off, width=window_width, height=window_height)
       if scale_factor != 0:
         res_window = win.Window(w.col_off * scale_factor, w.row_off * scale_factor,
                     w.width * scale_factor, w.height * scale_factor)
