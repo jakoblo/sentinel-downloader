@@ -67,8 +67,9 @@ def download(file, bbox, buffer=0, scale_factor=0):
                 masked=False,
                 window=w
             )
-
-        return img, src.meta.copy(), win.transform(w, src.transform)
+        t = win.transform(w, src.transform)
+        tr = t * t.scale((w.width/res_window.width),(w.height/res_window.height))
+        return img, src.meta.copy(), tr
 
       img = src.read(1, window=w)
       return img, src.meta.copy(), win.transform(w, src.transform)
